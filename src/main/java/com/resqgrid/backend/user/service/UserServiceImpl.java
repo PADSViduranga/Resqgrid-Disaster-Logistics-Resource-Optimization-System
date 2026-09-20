@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.resqgrid.backend.user.dto.RegisterRequest;
+import com.resqgrid.backend.user.dto.RegisterResponse;
 import com.resqgrid.backend.user.entity.Role;
 import com.resqgrid.backend.user.entity.Users;
 import com.resqgrid.backend.user.repository.RoleRepository;
@@ -26,7 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Users registerUser(RegisterRequest request) {
+    public RegisterResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException(
                     "Email already exists");
@@ -44,7 +45,15 @@ public class UserServiceImpl implements UserService {
                         request.getPassword()));
 
         newUser.setRole(defaultRole);
-        return userRepository.save(newUser);
+        
+        Users savedUser = userRepository.save(newUser);
+
+        return new RegisterResponse(
+                savedUser.getId(),
+                savedUser.getFullName(),
+                savedUser.getEmail(),
+                savedUser.getRole().getName(),
+                "User registered successfully");
     }
 
 }
